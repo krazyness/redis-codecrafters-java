@@ -17,18 +17,15 @@ public class Main {
       // Wait for connection from client.
       clientSocket = serverSocket.accept();
 
-      InputStream inputStream = clientSocket.getInputStream();
-      byte[] buffer = new byte[1024];
-      int bytesRead = inputStream.read(buffer);
+      OutputStream outputStream = clientSocket.getOutputStream();
 
       while (true) {
-        if (bytesRead == 0) {
-          break;
-        }
-        OutputStream outputStream = clientSocket.getOutputStream();
+        byte[] buffer = new byte[1024];
+        clientSocket.getInputStream().read(buffer);
+        String input = new String(buffer);
         outputStream.write("+PONG\r\n".getBytes());
       }
-      
+
     } catch (IOException e) {
       System.out.println("IOException: " + e.getMessage());
     } finally {
