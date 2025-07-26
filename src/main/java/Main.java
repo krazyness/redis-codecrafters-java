@@ -64,22 +64,29 @@ public class Main {
 
     String command, key, value;
     command = key = value = "";
+
+    int loopRun = 0;
     
     for (int i = 0; i < lines.length; i++) {
       if (lines[i].startsWith("$") && i + 1 < lines.length) {
         if (command.isEmpty()) {
           command = lines[i + 1];
-        } else if (command.equalsIgnoreCase("echo")) {
-          key = lines[i + 1];
-          break;
-        } else if (command.equalsIgnoreCase("set")) {
-          key = lines[i + 1];
-          value = lines[i + 2];
-          System.out.println("key: " + key + "\nvalue: " + value);
-          break;
-        } else if (command.equalsIgnoreCase("get")) {
-          key = lines[i+1];
-          break;
+        } else {
+          loopRun++;
+          if (command.equalsIgnoreCase("echo") && loopRun == 1) {
+            key = lines[i + 1];
+            break;
+          } else if (command.equalsIgnoreCase("set")) {
+            if (loopRun == 1) {
+              key = lines[i + 1];
+            } else if (loopRun == 2) {
+              value = lines[i + 2];
+              break;
+            }
+          } else if (command.equalsIgnoreCase("get") && loopRun == 1) {
+            key = lines[i+1];
+            break;
+          }
         }
       }
     }
