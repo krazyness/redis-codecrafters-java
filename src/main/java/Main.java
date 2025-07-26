@@ -95,10 +95,12 @@ public class Main {
 
     switch (command) {
       case "ping":
+        System.out.println("ping");
         return "+PONG\r\n";
       case "echo":
         return "$" + key.length() + "\r\n" + key + "\r\n";
       case "set":
+        System.out.println("set");
         data.put(key, value);
         return "+OK\r\n";
       case "get":
@@ -108,6 +110,7 @@ public class Main {
         }
         return "$" + storedValue.length() + "\r\n" + storedValue;
       default:
+        System.out.println("default");
         return "+PONG\r\n";
     }
   }
