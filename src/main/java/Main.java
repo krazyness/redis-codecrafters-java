@@ -80,7 +80,7 @@ public class Main {
             if (loopRun == 1) {
               key = lines[i + 1];
             } else if (loopRun == 2) {
-              value = lines[i + 2];
+              value = lines[i + 1];
               break;
             }
           } else if (command.equalsIgnoreCase("get") && loopRun == 1) {
