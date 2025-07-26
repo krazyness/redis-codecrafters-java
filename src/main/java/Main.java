@@ -110,7 +110,7 @@ public class Main {
         if (storedValue == null) {
           return "$-1\r\n";
         }
-        return "$" + storedValue.length() + "\r\n" + storedValue;
+        return "$" + storedValue.length() + "\r\n" + storedValue + "\r\n";
       default:
         System.out.println("default");
         return "+PONG\r\n";
