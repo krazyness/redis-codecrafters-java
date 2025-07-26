@@ -93,6 +93,8 @@ public class Main {
       }
     }
 
+    System.out.println("Command: " + command);
+
     switch (command) {
       case "ping":
         System.out.println("ping");
