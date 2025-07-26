@@ -66,6 +66,7 @@ public class Main {
     
     for (int i = 0; i < lines.length; i++) {
       if (lines[i].startsWith("$") && i + 1 < lines.length) {
+        System.out.println("lines[i]: " + lines[i]);
         if (command.isEmpty()) {
           command = lines[i + 1];
         } else if (command.equalsIgnoreCase("echo")) {
@@ -74,6 +75,7 @@ public class Main {
         } else if (command.equalsIgnoreCase("set")) {
           key = lines[i + 1];
           value = lines[i + 2];
+          System.out.println("key: " + key + "\nvalue: " + value);
           break;
         } else if (command.equalsIgnoreCase("get")) {
           key = lines[i+1];
