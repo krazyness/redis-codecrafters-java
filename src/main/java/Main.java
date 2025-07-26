@@ -59,6 +59,7 @@ public class Main {
   }
 
   private static String handleCommand(String input) {
+    System.out.println(input);
     String[] lines = input.trim().split("\r\n");
 
     String command, key, value;
@@ -66,7 +67,6 @@ public class Main {
     
     for (int i = 0; i < lines.length; i++) {
       if (lines[i].startsWith("$") && i + 1 < lines.length) {
-        System.out.println("lines[i]: " + lines[i]);
         if (command.isEmpty()) {
           command = lines[i + 1];
         } else if (command.equalsIgnoreCase("echo")) {
