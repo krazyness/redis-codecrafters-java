@@ -1,13 +1,26 @@
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class Main {
-  private static Map<String, String> data = new HashMap<>();
+  public static class ValueWithExpiry {
+    String value;
+    long expiry;
+
+    ValueWithExpiry(String value, long expiry) {
+      this.value = value;
+      this.expiry = expiry;
+    }
+
+    boolean isExpired() {
+      return expiry > 0 && System.currentTimeMillis() > expiry;
+    }
+  }
+
+  private static Map<String, ValueWithExpiry> data = new ConcurrentHashMap<>();
 
   public static void main(String[] args){
     System.out.println("Logs from your program will appear here!");
@@ -66,6 +79,7 @@ public class Main {
     command = key = value = "";
 
     int loopRun = 0;
+    long expiry = 0;
     
     for (int i = 0; i < lines.length; i++) {
       if (lines[i].startsWith("$") && i + 1 < lines.length) {
@@ -83,7 +97,11 @@ public class Main {
             } else if (loopRun == 2) {
               value = lines[i + 1];
               System.out.println("set: " + value);
-              break;
+            } else if (loopRun == 3) {
+              if (i + 3 < lines.length && lines[i + 2].startsWith("$")) {
+                expiry = Long.parseLong(lines[i + 3]);
+                break;
+              }
             }
           } else if (command.equalsIgnoreCase("get") && loopRun == 1) {
             key = lines[i+1];
@@ -103,14 +121,18 @@ public class Main {
         return "$" + key.length() + "\r\n" + key + "\r\n";
       case "SET":
         System.out.println("set");
-        data.put(key, value);
+        long expiryTime = expiry > 0 ? System.currentTimeMillis() + expiry : 0;
+        data.put(key, new ValueWithExpiry(value, expiryTime));
         return "+OK\r\n";
       case "GET":
-        String storedValue = data.get(key);
-        if (storedValue == null) {
+        ValueWithExpiry storedValue = data.get(key);
+        if (storedValue == null || storedValue.isExpired()) {
+          if (storedValue != null && storedValue.isExpired()) {
+            data.remove(key);
+          }
           return "$-1\r\n";
         }
-        return "$" + storedValue.length() + "\r\n" + storedValue + "\r\n";
+        return "$" + storedValue.value.length() + "\r\n" + storedValue + "\r\n";
       default:
         System.out.println("default");
         return "+PONG\r\n";
