@@ -83,7 +83,8 @@ public class Main {
 
     List<String> values = new ArrayList<>();
 
-    int loopRun = 0;
+    int loopRun, start, stop;
+    loopRun = start = stop = 0;
     long expiry = 0;
     
     for (int i = 0; i < lines.length; i++) {
@@ -117,6 +118,15 @@ public class Main {
             } else {
               values.add(lines[i + 1]);
             }
+          } else if (command.equalsIgnoreCase("lrange")) {
+            if (loopRun == 1) {
+              key = lines[i + 1];
+            } else if (loopRun == 2) {
+              start = Integer.parseInt(lines[i + 1]);
+            } else if (loopRun == 3) {
+              stop = Integer.parseInt(lines[i + 1]);
+              break;
+            }
           }
         }
       }
@@ -145,9 +155,37 @@ public class Main {
         }
         return "$" + storedValue.value.length() + "\r\n" + storedValue.value + "\r\n";
       case "RPUSH":
-        List<String> list = lists.computeIfAbsent(key, k -> new ArrayList<>());
-        list.addAll(values);
-        return ":" + list.size() + "\r\n";
+        List<String> rpushList = lists.computeIfAbsent(key, k -> new ArrayList<>());
+        rpushList.addAll(values);
+        return ":" + rpushList.size() + "\r\n";
+      case "LRANGE":
+        List<String> lrangeList = lists.get(key);
+        if (lrangeList == null || lrangeList.isEmpty()) {
+          return "*0\r\n";
+        }
+
+        int size = lrangeList.size();
+        if (start < 0) start = size + start;
+        if (stop < 0) stop = size + stop;
+
+        start = Math.max(0, start);
+        stop = Math.min(size - 1, stop);
+
+        if (start > stop || start >= size) {
+          return "*0\r\n";
+        }
+
+        StringBuilder response = new StringBuilder();
+        int rangeSize = stop - start + 1;
+        response.append("*").append(rangeSize).append("\r\n");
+
+        for (int i = start; i <= stop; i++) {
+          String element = lrangeList.get(i);
+          response.append("$").append(element.length()).append("\r\n");
+          response.append(element).append("\r\n");
+        }
+
+        return response.toString();
       default:
         System.out.println("default");
         return "+PONG\r\n";
