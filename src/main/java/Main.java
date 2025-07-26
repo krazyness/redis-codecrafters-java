@@ -3,8 +3,12 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Main {
+  private static Map<String, String> data = new HashMap<>();
+
   public static void main(String[] args){
     System.out.println("Logs from your program will appear here!");
 
@@ -57,25 +61,43 @@ public class Main {
   private static String handleCommand(String input) {
     String[] lines = input.trim().split("\r\n");
 
-    String command = "";
-    String message = "";
+    String command, key, value;
+    command = key = value = "";
     
     for (int i = 0; i < lines.length; i++) {
       if (lines[i].startsWith("$") && i + 1 < lines.length) {
         if (command.isEmpty()) {
           command = lines[i + 1];
         } else if (command.equalsIgnoreCase("echo")) {
-          message = lines[i + 1];
+          key = lines[i + 1];
+          break;
+        } else if (command.equalsIgnoreCase("set")) {
+          key = lines[i + 1];
+          value = lines[i + 2];
+          break;
+        } else if (command.equalsIgnoreCase("get")) {
+          key = lines[i+1];
           break;
         }
       }
     }
 
-    if (command.equalsIgnoreCase("echo")) {
-      return "$" + message.length() + "\r\n" + message + "\r\n";
-    } else if (command.equals("ping")) {
-      return "+PONG\r\n";
+    switch (command) {
+      case "ping":
+        return "+PONG\r\n";
+      case "echo":
+        return "$" + key.length() + "\r\n" + key + "\r\n";
+      case "set":
+        data.put(key, value);
+        return "+OK\r\n";
+      case "get":
+        String storedValue = data.get(key);
+        if (storedValue == null) {
+          return "$-1\r\n";
+        }
+        return "$" + storedValue.length() + "\r\n" + storedValue;
+      default:
+        return "+PONG\r\n";
     }
-    return "+PONG\r\n";
   }
 }
