@@ -132,7 +132,7 @@ public class Main {
           }
           return "$-1\r\n";
         }
-        return "$" + storedValue.value.length() + "\r\n" + storedValue + "\r\n";
+        return "$" + storedValue.value.length() + "\r\n" + storedValue.value + "\r\n";
       default:
         System.out.println("default");
         return "+PONG\r\n";
