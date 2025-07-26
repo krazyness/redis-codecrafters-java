@@ -2,6 +2,8 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -21,6 +23,7 @@ public class Main {
   }
 
   private static Map<String, ValueWithExpiry> data = new ConcurrentHashMap<>();
+  private static Map<String, List<String>> lists = new ConcurrentHashMap<>();
 
   public static void main(String[] args){
     System.out.println("Logs from your program will appear here!");
@@ -78,6 +81,8 @@ public class Main {
     String command, key, value;
     command = key = value = "";
 
+    List<String> values = new ArrayList<>();
+
     int loopRun = 0;
     long expiry = 0;
     
@@ -106,6 +111,12 @@ public class Main {
           } else if (command.equalsIgnoreCase("get") && loopRun == 1) {
             key = lines[i+1];
             break;
+          } else if (command.equalsIgnoreCase("rpush")) {
+            if (loopRun == 1) {
+              key = lines[i + 1];
+            } else {
+              values.add(lines[i + 1]);
+            }
           }
         }
       }
@@ -133,6 +144,10 @@ public class Main {
           return "$-1\r\n";
         }
         return "$" + storedValue.value.length() + "\r\n" + storedValue.value + "\r\n";
+      case "RPUSH":
+        List<String> list = lists.computeIfAbsent(key, k -> new ArrayList<>());
+        list.addAll(values);
+        return ":" + list.size() + "\r\n";
       default:
         System.out.println("default");
         return "+PONG\r\n";
