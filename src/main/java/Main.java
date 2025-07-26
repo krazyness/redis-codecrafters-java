@@ -79,8 +79,10 @@ public class Main {
           } else if (command.equalsIgnoreCase("set")) {
             if (loopRun == 1) {
               key = lines[i + 1];
+              System.out.println("key: " + key);
             } else if (loopRun == 2) {
               value = lines[i + 1];
+              System.out.println("set: " + value);
               break;
             }
           } else if (command.equalsIgnoreCase("get") && loopRun == 1) {
