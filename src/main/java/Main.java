@@ -70,7 +70,7 @@ public class Main {
     for (int i = 0; i < lines.length; i++) {
       if (lines[i].startsWith("$") && i + 1 < lines.length) {
         if (command.isEmpty()) {
-          command = lines[i + 1];
+          command = lines[i + 1].toUpperCase();
         } else {
           loopRun++;
           if (command.equalsIgnoreCase("echo") && loopRun == 1) {
@@ -96,16 +96,16 @@ public class Main {
     System.out.println("Command: " + command);
 
     switch (command) {
-      case "ping":
+      case "PING":
         System.out.println("ping");
         return "+PONG\r\n";
-      case "echo":
+      case "ECHO":
         return "$" + key.length() + "\r\n" + key + "\r\n";
-      case "set":
+      case "SET":
         System.out.println("set");
         data.put(key, value);
         return "+OK\r\n";
-      case "get":
+      case "GET":
         String storedValue = data.get(key);
         if (storedValue == null) {
           return "$-1\r\n";
