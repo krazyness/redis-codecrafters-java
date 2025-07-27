@@ -251,14 +251,13 @@ public class Main {
         return lpopResponse.toString();
       case "BLPOP":
         int timeout = start;
-        long startTime = System.currentTimeMillis();
-        long timeoutMs = timeout == 0 ? Long.MAX_VALUE : timeout;
+        long endTime = timeout == 0 ? Long.MAX_VALUE : timeout;
         
         List<String> keysToCheck = new ArrayList<>();
         keysToCheck.add(key);
         keysToCheck.addAll(values);
         
-        while (System.currentTimeMillis() - startTime < timeoutMs) {
+        while (System.currentTimeMillis() < endTime) {
           for (String checkKey : keysToCheck) {
             List<String> blpopList = lists.get(checkKey);
             if (blpopList != null && !blpopList.isEmpty()) {
