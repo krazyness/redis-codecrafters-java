@@ -145,24 +145,19 @@ public class Main {
               break;
             }
           } else if (command.equalsIgnoreCase("blpop")) {
-            int argCount = 0;
-            for (String line : lines) {
-              if (!line.isEmpty()) {
-                argCount++;
-              }
-            }
-            
-            System.out.println("BLPOP parsing - loopRun: " + loopRun + ", argCount: " + argCount + ", current line: " + lines[i + 1]);
+            System.out.println("BLPOP parsing - loopRun: " + loopRun + ", current line: " + lines[i + 1]);
             
             if (loopRun == 1) {
               key = lines[i + 1];
               System.out.println("Set key: " + key);
-            } else if (loopRun == argCount - 1) {
+            } else if (loopRun == 2) {
+              System.out.println("Processing timeout parameter");
               double timeoutSeconds = Double.parseDouble(lines[i + 1]);
               start = (int)(timeoutSeconds * 1000);
               System.out.println("Set timeout: " + timeoutSeconds + " seconds = " + start + " ms");
               break;
             } else {
+              System.out.println("Adding to values (loopRun = " + loopRun + ")");
               values.add(lines[i + 1]);
               System.out.println("Added to values: " + lines[i + 1]);
             }
