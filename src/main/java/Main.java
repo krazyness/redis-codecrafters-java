@@ -133,9 +133,15 @@ public class Main {
             } else {
               values.add(lines[i + 1]);
             }
-          } else if (command.equalsIgnoreCase("llen") || command.equalsIgnoreCase("lpop")) {
+          } else if (command.equalsIgnoreCase("llen")) {
             if (loopRun == 1) {
               key = lines[i + 1];
+            }
+          } else if (command.equalsIgnoreCase("lpop")) {
+            if (loopRun == 1) {
+              key = lines[i + 1];
+            } else if (loopRun == 2) {
+              start = Integer.parseInt(lines[i + 1]);
               break;
             }
           }
@@ -192,17 +198,17 @@ public class Main {
           return "*0\r\n";
         }
 
-        StringBuilder response = new StringBuilder();
+        StringBuilder lrangeResponse = new StringBuilder();
         int rangeSize = stop - start + 1;
-        response.append("*").append(rangeSize).append("\r\n");
+        lrangeResponse.append("*").append(rangeSize).append("\r\n");
 
         for (int i = start; i <= stop; i++) {
           String element = lrangeList.get(i);
-          response.append("$").append(element.length()).append("\r\n");
-          response.append(element).append("\r\n");
+          lrangeResponse.append("$").append(element.length()).append("\r\n");
+          lrangeResponse.append(element).append("\r\n");
         }
 
-        return response.toString();
+        return lrangeResponse.toString();
       case "LLEN":
         List<String> llenList = lists.get(key);
         if (llenList == null) {
@@ -214,8 +220,25 @@ public class Main {
         if (lpopList == null || lpopList.isEmpty()) {
           return "$-1\r\n";
         }
-        String firstElement = lpopList.remove(0);
-        return "$" + firstElement.length() + "\r\n" + firstElement + "\r\n";
+
+        int count = start > 0 ? start : 1;
+        int actualCount = Math.min(count, lpopList.size());
+
+        if (actualCount == 1) {
+          String firstElement = lpopList.remove(0);
+          return "$" + firstElement.length() + "\r\n" + firstElement + "\r\n";
+        }
+
+        StringBuilder lpopResponse = new StringBuilder();
+        lpopResponse.append("*").append(actualCount).append("\r\n");
+
+        for (int i = 0; i < actualCount; i++) {
+          String element = lpopList.remove(0);
+          lpopResponse.append("$").append(element.length()).append("\r\n");
+          lpopResponse.append(element).append("\r\n");
+        }
+
+        return lpopResponse.toString();
       default:
         System.out.println("default");
         return "+PONG\r\n";
