@@ -257,28 +257,24 @@ public class Main {
 
         return lpopResponse.toString();
       case "BLPOP":
-        System.out.println("BLPOP case reached");
-        System.out.println("start value: " + start);
-        System.out.println("key: " + key);
-        System.out.println("values: " + values);
         int timeoutMs = start;
-        System.out.println("BLPOP timeout: " + timeoutMs);
         long startTime = System.currentTimeMillis();
         long endTime = timeoutMs == 0 ? Long.MAX_VALUE : startTime + timeoutMs;
         
         List<String> keysToCheck = new ArrayList<>();
         keysToCheck.add(key);
         keysToCheck.addAll(values);
-
-        System.out.println("Keys to check: " + keysToCheck);
         
         while (System.currentTimeMillis() < endTime) {
           for (String checkKey : keysToCheck) {
             List<String> blpopList = lists.get(checkKey);
             if (blpopList != null && !blpopList.isEmpty()) {
-              String element = blpopList.remove(0);
-              System.out.println("Found element: " + element);
-              return "*2\r\n$" + checkKey.length() + "\r\n" + checkKey + "\r\n$" + element.length() + "\r\n" + element + "\r\n";
+              synchronized (blpopList) {
+                if (!blpopList.isEmpty()) {
+                  String element = blpopList.remove(0);
+                  return "*2\r\n$" + checkKey.length() + "\r\n" + checkKey + "\r\n$" + element.length() + "\r\n" + element + "\r\n";
+                }
+              }
             }
           }
           
@@ -286,12 +282,10 @@ public class Main {
             Thread.sleep(10);
           } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            System.out.println("BLPOP interrupt");
             return "*-1\r\n";
           }
         }
         
-        System.out.println("BLPOP timeout reached");
         return "*-1\r\n";
       default:
         System.out.println("default");
