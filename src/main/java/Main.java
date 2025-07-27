@@ -166,8 +166,8 @@ public class Main {
         return ":" + rpushList.size() + "\r\n";
       case "LPUSH":
         List<String> lpushList = lists.computeIfAbsent(key, k -> new ArrayList<>());
-        for (int i = values.size() - 1; i >= 0; i--) {
-          lpushList.add(0, values.get(i));
+        for (String val : values) {
+          lpushList.add(0, val);
         }
         return ":" + lpushList.size() + "\r\n";
       case "LRANGE":
