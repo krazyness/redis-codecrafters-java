@@ -148,6 +148,11 @@ public class Main {
             if (loopRun == 1) {
               key = lines[i + 1];
             } else if (loopRun == 2) {
+              try {
+                start = Integer.parseInt(lines[i + 1]);
+                break;
+              } catch (NumberFormatException e) {}
+            } else if (loopRun > 2) {
               start = Integer.parseInt(lines[i + 1]);
               break;
             }
@@ -249,15 +254,26 @@ public class Main {
       case "BLPOP":
         int timeout = start;
         long startTime = System.currentTimeMillis();
-        long timeoutMs = timeout == 0? Long.MAX_VALUE : timeout * 1000L;
-
-        while (System.currentTimeMillis() - startTime < timeoutMs) {
-          List<String> blpopList = lists.get(key);
-          if (blpopList != null && !blpopList.isEmpty()) {
-            String element = blpopList.remove(0);
-            return "*2\r\n$" + key.length() + "\r\n" + key + "\r\n$" + element.length() + "\r\n" + element + "\r\n";
+        long timeoutMs = timeout == 0 ? Long.MAX_VALUE : timeout * 1000L;
+        
+        // Parse all keys (all parameters except the last one which is timeout)
+        List<String> keysToCheck = new ArrayList<>();
+        for (int keyIndex = 1; keyIndex < lines.length - 1; keyIndex++) {
+          if (!lines[keyIndex].isEmpty()) {
+            keysToCheck.add(lines[keyIndex]);
           }
-
+        }
+        
+        while (System.currentTimeMillis() - startTime < timeoutMs) {
+          // Check each key in order
+          for (String checkKey : keysToCheck) {
+            List<String> blpopList = lists.get(checkKey);
+            if (blpopList != null && !blpopList.isEmpty()) {
+              String element = blpopList.remove(0);
+              return "*2\r\n$" + checkKey.length() + "\r\n" + checkKey + "\r\n$" + element.length() + "\r\n" + element + "\r\n";
+            }
+          }
+          
           try {
             Thread.sleep(100);
           } catch (InterruptedException e) {
@@ -265,7 +281,7 @@ public class Main {
             return "$-1\r\n";
           }
         }
-
+        
         return "$-1\r\n";
       default:
         System.out.println("default");
