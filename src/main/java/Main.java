@@ -144,6 +144,13 @@ public class Main {
               start = Integer.parseInt(lines[i + 1]);
               break;
             }
+          } else if (command.equalsIgnoreCase("blpop")) {
+            if (loopRun == 1) {
+              key = lines[i + 1];
+            } else if (loopRun == 2) {
+              start = Integer.parseInt(lines[i + 1]);
+              break;
+            }
           }
         }
       }
@@ -239,6 +246,27 @@ public class Main {
         }
 
         return lpopResponse.toString();
+      case "BLPOP":
+        int timeout = start;
+        long startTime = System.currentTimeMillis();
+        long timeoutMs = timeout == 0? Long.MAX_VALUE : timeout * 1000L;
+
+        while (System.currentTimeMillis() - startTime < timeoutMs) {
+          List<String> blpopList = lists.get(key);
+          if (blpopList != null && !blpopList.isEmpty()) {
+            String element = blpopList.remove(0);
+            return "*2\r\n$" + key.length() + "\r\n" + key + "\r\n$" + element.length() + "\r\n" + element + "\r\n";
+          }
+
+          try {
+            Thread.sleep(100);
+          } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            return "$-1\r\n";
+          }
+        }
+
+        return "$-1\r\n";
       default:
         System.out.println("default");
         return "+PONG\r\n";
