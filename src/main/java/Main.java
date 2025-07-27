@@ -127,6 +127,12 @@ public class Main {
               stop = Integer.parseInt(lines[i + 1]);
               break;
             }
+          } else if (command.equalsIgnoreCase("lpush")) {
+            if (loopRun == 1) {
+              key = lines[i + 1];
+            } else {
+              values.add(lines[i + 1]);
+            }
           }
         }
       }
@@ -158,6 +164,12 @@ public class Main {
         List<String> rpushList = lists.computeIfAbsent(key, k -> new ArrayList<>());
         rpushList.addAll(values);
         return ":" + rpushList.size() + "\r\n";
+      case "LPUSH":
+        List<String> lpushList = lists.computeIfAbsent(key, k -> new ArrayList<>());
+        for (int i = values.size() - 1; i >= 0; i--) {
+          lpushList.add(0, values.get(i));
+        }
+        return ":" + lpushList.size() + "\r\n";
       case "LRANGE":
         List<String> lrangeList = lists.get(key);
         if (lrangeList == null || lrangeList.isEmpty()) {
