@@ -250,6 +250,10 @@ public class Main {
 
         return lpopResponse.toString();
       case "BLPOP":
+        System.out.println("BLPOP case reached");
+        System.out.println("start value: " + start);
+        System.out.println("key: " + key);
+        System.out.println("values: " + values);
         int timeoutMs = start;
         System.out.println("BLPOP timeout: " + timeoutMs);
         long startTime = System.currentTimeMillis();
