@@ -250,8 +250,9 @@ public class Main {
 
         return lpopResponse.toString();
       case "BLPOP":
-        int timeout = start;
-        long endTime = timeout == 0 ? Long.MAX_VALUE : timeout;
+        int timeoutMs = start;
+        long startTime = System.currentTimeMillis();
+        long endTime = timeoutMs == 0 ? Long.MAX_VALUE : startTime + timeoutMs;
         
         List<String> keysToCheck = new ArrayList<>();
         keysToCheck.add(key);
