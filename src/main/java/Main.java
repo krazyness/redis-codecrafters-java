@@ -133,6 +133,11 @@ public class Main {
             } else {
               values.add(lines[i + 1]);
             }
+          } else if (command.equalsIgnoreCase("llen")) {
+            if (loopRun == 1) {
+              key = lines[i + 1];
+              break;
+            }
           }
         }
       }
@@ -198,6 +203,12 @@ public class Main {
         }
 
         return response.toString();
+      case "LLEN":
+        List<String> llenList = lists.get(key);
+        if (llenList == null) {
+          return ":0\r\n";
+        }
+        return ":" + llenList.size() + "\r\n";
       default:
         System.out.println("default");
         return "+PONG\r\n";
