@@ -252,7 +252,7 @@ public class Main {
       case "BLPOP":
         int timeout = start;
         long startTime = System.currentTimeMillis();
-        long timeoutMs = timeout == 0 ? Long.MAX_VALUE : timeout * 1000L;
+        long timeoutMs = timeout == 0 ? Long.MAX_VALUE : timeout;
         
         List<String> keysToCheck = new ArrayList<>();
         keysToCheck.add(key);
@@ -268,7 +268,7 @@ public class Main {
           }
           
           try {
-            Thread.sleep(100);
+            Thread.sleep(10);
           } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             return "$-1\r\n";
