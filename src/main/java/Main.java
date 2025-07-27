@@ -147,14 +147,12 @@ public class Main {
           } else if (command.equalsIgnoreCase("blpop")) {
             if (loopRun == 1) {
               key = lines[i + 1];
-            } else if (loopRun == 2) {
-              try {
-                start = Integer.parseInt(lines[i + 1]);
-                break;
-              } catch (NumberFormatException e) {}
-            } else if (loopRun > 2) {
-              start = Integer.parseInt(lines[i + 1]);
+            } else if (loopRun == lines.length - 1) {
+              double timeoutSeconds = Double.parseDouble(lines[i + 1]);
+              start = (int)(timeoutSeconds * 1000);
               break;
+            } else {
+              values.add(lines[i + 1]);
             }
           }
         }
@@ -256,16 +254,11 @@ public class Main {
         long startTime = System.currentTimeMillis();
         long timeoutMs = timeout == 0 ? Long.MAX_VALUE : timeout * 1000L;
         
-        // Parse all keys (all parameters except the last one which is timeout)
         List<String> keysToCheck = new ArrayList<>();
-        for (int keyIndex = 1; keyIndex < lines.length - 1; keyIndex++) {
-          if (!lines[keyIndex].isEmpty()) {
-            keysToCheck.add(lines[keyIndex]);
-          }
-        }
+        keysToCheck.add(key);
+        keysToCheck.addAll(values);
         
         while (System.currentTimeMillis() - startTime < timeoutMs) {
-          // Check each key in order
           for (String checkKey : keysToCheck) {
             List<String> blpopList = lists.get(checkKey);
             if (blpopList != null && !blpopList.isEmpty()) {
