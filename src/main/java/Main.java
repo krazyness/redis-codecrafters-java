@@ -133,7 +133,7 @@ public class Main {
             } else {
               values.add(lines[i + 1]);
             }
-          } else if (command.equalsIgnoreCase("llen")) {
+          } else if (command.equalsIgnoreCase("llen") || command.equalsIgnoreCase("lpop")) {
             if (loopRun == 1) {
               key = lines[i + 1];
               break;
@@ -209,6 +209,13 @@ public class Main {
           return ":0\r\n";
         }
         return ":" + llenList.size() + "\r\n";
+      case "LPOP":
+        List<String> lpopList = lists.get(key);
+        if (lpopList == null || lpopList.isEmpty()) {
+          return "$-1\r\n";
+        }
+        String firstElement = lpopList.remove(0);
+        return "$" + firstElement.length() + "\r\n" + firstElement + "\r\n";
       default:
         System.out.println("default");
         return "+PONG\r\n";
