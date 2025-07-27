@@ -290,6 +290,16 @@ public class Main {
             System.out.println("BLPOP interrupted");
             return "*-1\r\n";
           }
+          
+          if (timeoutMs == 0) {
+            try {
+              Thread.sleep(90);
+            } catch (InterruptedException e) {
+              Thread.currentThread().interrupt();
+              System.out.println("BLPOP infinite wait interrupted");
+              return "*-1\r\n";
+            }
+          }
         }
         
         System.out.println("BLPOP timeout reached");
