@@ -175,8 +175,6 @@ public class Main {
       }
     }
 
-    System.out.println("Command: " + command);
-
     switch (command) {
       case "PING":
         System.out.println("ping");
@@ -319,6 +317,13 @@ public class Main {
           }
         }
 
+        if (streams.containsKey(key)) {
+          List<Map<String, Object>> list = streams.get(key);
+          if (list != null && !list.isEmpty()) {
+            return "+stream\r\n";
+          }
+        }
+
         return "+none\r\n";
       case "XADD":
         String streamKey = key;
@@ -327,7 +332,7 @@ public class Main {
         Map<String, String> fields = new HashMap<>();
         for (int i = 0; i < values.size(); i += 2) {
           if (i + 1 < values.size()) {
-            fields.put(values.get(i), values.get(i + 1));
+            fields.put(values.get(i), values.get(i + 1))  ;
           }
         }
 
