@@ -3,6 +3,7 @@ import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -24,6 +25,7 @@ public class Main {
 
   private static Map<String, ValueWithExpiry> data = new ConcurrentHashMap<>();
   private static Map<String, List<String>> lists = new ConcurrentHashMap<>();
+  private static Map<String, List<Map<String, Object>>> streams = new ConcurrentHashMap<>();
 
   public static void main(String[] args){
     System.out.println("Logs from your program will appear here!");
@@ -159,6 +161,14 @@ public class Main {
             if (loopRun == 1) {
               key = lines[i + 1];
               break;
+            }
+          } else if (command.equalsIgnoreCase("xadd")) {
+            if (loopRun == 1) {
+              key = lines[i + 1];
+            } else if (loopRun == 2) {
+              value = lines[i + 1];
+            } else {
+              values.add(lines[i + 1]);
             }
           }
         }
@@ -310,6 +320,29 @@ public class Main {
         }
 
         return "+none\r\n";
+      case "XADD":
+        String streamKey = key;
+        String entryId = value;
+
+        Map<String, String> fields = new HashMap<>();
+        for (int i = 0; i < values.size(); i += 2) {
+          if (i + 1 < values.size()) {
+            fields.put(values.get(i), values.get(i + 1));
+          }
+        }
+
+        if ("*".equals(entryId)) {
+          long timestamp = System.currentTimeMillis();
+          entryId = timestamp + "-0";
+        }
+
+        Map<String, Object> entry = new HashMap<>();
+        entry.put("id", entryId);
+        entry.put("fields", fields);
+
+        streams.computeIfAbsent(streamKey, k -> new ArrayList<>()).add(entry);
+
+        return "$" + entryId.length() + "\r\n" + entryId + "\r\n";
       default:
         return "+PONG\r\n";
     }
