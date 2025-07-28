@@ -276,13 +276,7 @@ public class Main {
         
         System.out.println("Keys to check: " + keysToCheck);
         
-        int loopCount = 0;
         while (timeoutMs == 0 || System.currentTimeMillis() < endTime) {
-          loopCount++;
-          if (loopCount % 100 == 0) {
-            System.out.println("BLPOP still waiting, loop count: " + loopCount);
-          }
-          
           for (String checkKey : keysToCheck) {
             List<String> blpopList = lists.get(checkKey);
             if (blpopList != null && !blpopList.isEmpty()) {
@@ -297,7 +291,7 @@ public class Main {
           }
           
           try {
-            Thread.sleep(100);
+            Thread.sleep(10); // Much shorter sleep for better responsiveness
           } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             System.out.println("BLPOP interrupted");
