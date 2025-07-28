@@ -264,13 +264,17 @@ public class Main {
 
         return lpopResponse.toString();
       case "BLPOP":
+        System.out.println("BLPOP case reached");
         int timeoutMs = start;
+        System.out.println("Timeout: " + timeoutMs + "ms");
         long startTime = System.currentTimeMillis();
         long endTime = timeoutMs == 0 ? Long.MAX_VALUE : startTime + timeoutMs;
         
         List<String> keysToCheck = new ArrayList<>();
         keysToCheck.add(key);
         keysToCheck.addAll(values);
+        
+        System.out.println("Keys to check: " + keysToCheck);
         
         while (timeoutMs == 0 || System.currentTimeMillis() < endTime) {
           for (String checkKey : keysToCheck) {
@@ -279,6 +283,7 @@ public class Main {
               synchronized (blpopList) {
                 if (!blpopList.isEmpty()) {
                   String element = blpopList.remove(0);
+                  System.out.println("Found element: " + element);
                   return "*2\r\n$" + checkKey.length() + "\r\n" + checkKey + "\r\n$" + element.length() + "\r\n" + element + "\r\n";
                 }
               }
@@ -289,6 +294,7 @@ public class Main {
             Thread.sleep(10);
           } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
+            System.out.println("BLPOP interrupted");
             return "*-1\r\n";
           }
           
@@ -297,10 +303,13 @@ public class Main {
               Thread.sleep(90);
             } catch (InterruptedException e) {
               Thread.currentThread().interrupt();
+              System.out.println("BLPOP infinite wait interrupted");
               return "*-1\r\n";
             }
           }
         }
+        
+        System.out.println("BLPOP timeout reached");
         return "*-1\r\n";
       case "TYPE":
         if (data.containsKey(key)) {
