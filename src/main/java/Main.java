@@ -145,21 +145,20 @@ public class Main {
               break;
             }
           } else if (command.equalsIgnoreCase("blpop")) {
-            System.out.println("BLPOP parsing - loopRun: " + loopRun + ", current line: " + lines[i + 1]);
             
             if (loopRun == 1) {
               key = lines[i + 1];
-              System.out.println("Set key: " + key);
             } else if (loopRun == 2) {
-              System.out.println("Processing timeout parameter");
               double timeoutSeconds = Double.parseDouble(lines[i + 1]);
               start = (int)(timeoutSeconds * 1000);
-              System.out.println("Set timeout: " + timeoutSeconds + " seconds = " + start + " ms");
               break;
             } else {
-              System.out.println("Adding to values (loopRun = " + loopRun + ")");
               values.add(lines[i + 1]);
-              System.out.println("Added to values: " + lines[i + 1]);
+            }
+          } else if (command.equalsIgnoreCase("type")) {
+            if (loopRun == 1) {
+              key = lines[i + 1];
+              break;
             }
           }
         }
@@ -257,17 +256,13 @@ public class Main {
 
         return lpopResponse.toString();
       case "BLPOP":
-        System.out.println("BLPOP case reached");
         int timeoutMs = start;
-        System.out.println("Timeout: " + timeoutMs + "ms");
         long startTime = System.currentTimeMillis();
         long endTime = timeoutMs == 0 ? Long.MAX_VALUE : startTime + timeoutMs;
         
         List<String> keysToCheck = new ArrayList<>();
         keysToCheck.add(key);
         keysToCheck.addAll(values);
-        
-        System.out.println("Keys to check: " + keysToCheck);
         
         while (timeoutMs == 0 || System.currentTimeMillis() < endTime) {
           for (String checkKey : keysToCheck) {
@@ -276,7 +271,6 @@ public class Main {
               synchronized (blpopList) {
                 if (!blpopList.isEmpty()) {
                   String element = blpopList.remove(0);
-                  System.out.println("Found element: " + element);
                   return "*2\r\n$" + checkKey.length() + "\r\n" + checkKey + "\r\n$" + element.length() + "\r\n" + element + "\r\n";
                 }
               }
@@ -287,7 +281,6 @@ public class Main {
             Thread.sleep(10);
           } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            System.out.println("BLPOP interrupted");
             return "*-1\r\n";
           }
           
@@ -296,16 +289,28 @@ public class Main {
               Thread.sleep(90);
             } catch (InterruptedException e) {
               Thread.currentThread().interrupt();
-              System.out.println("BLPOP infinite wait interrupted");
               return "*-1\r\n";
             }
           }
         }
-        
-        System.out.println("BLPOP timeout reached");
         return "*-1\r\n";
+      case "TYPE":
+        if (data.containsKey(key)) {
+          ValueWithExpiry valueWithExpiry = data.get(key);
+          if (valueWithExpiry != null && !valueWithExpiry.isExpired()) {
+            return "+string\r\n";
+          }
+        }
+
+        if (lists.containsKey(key)) {
+          List<String> list = lists.get(key);
+          if (list != null && !list.isEmpty()) {
+            return "+list\r\n";
+          }
+        }
+
+        return "+none\r\n";
       default:
-        System.out.println("default");
         return "+PONG\r\n";
     }
   }
